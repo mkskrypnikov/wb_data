@@ -1,9 +1,16 @@
+import os
 import requests
 from dotenv import load_dotenv
-import os
+from datetime import datetime as dt, timedelta
 
 
-def get_data(api_token: str) -> dict:
+def get_data(
+    url: str,
+    api_token: str,
+    offset: int,
+    start_date: str,
+    end_date: str
+) -> dict:
     headers = {
         "Authorization": api_token,
         "Content-Type": "application/json"
@@ -12,8 +19,8 @@ def get_data(api_token: str) -> dict:
     payload = {
         "stockType": "",
         "currentPeriod": {
-            "start": "2025-07-17",
-            "end": "2025-07-17"
+            "start": start_date,
+            "end": end_date
         },
         "skipDeletedNm": True,
         "orderBy": {
@@ -21,7 +28,7 @@ def get_data(api_token: str) -> dict:
             "mode": "asc"
         },
         "limit": 150,
-        "offset": 1,
+        "offset": offset,
         "availabilityFilters": [
             "deficient",
             "actual",
@@ -29,21 +36,30 @@ def get_data(api_token: str) -> dict:
             "nonActual",
             "nonLiquid",
             "invalidData"
-        ],
+        ]
     }
 
-    res = requests.post(url, headers=headers, json=payload)
-
-    print(res.status_code)
-    return res.json()
+    response = requests.post(url, headers=headers, json=payload)
+    print(f"Status code: {response.status_code}")
+    return response.json()
 
 
 def main():
-    token = str(os.getenv('TOKEN'))
-    print(get_data(token))
+    url = "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/products"
+    token = os.getenv("TOKEN")
+
+    if not token:
+        raise ValueError("TOKEN not found in environment variables")
+
+    today = dt.now()
+    yesterday = today - timedelta(days=1)
+    date_str = yesterday.strftime("%Y-%m-%d")
+
+    offset = 0
+    result = get_data(url, token, offset, date_str, date_str)
+    print(result)
 
 
 if __name__ == "__main__":
     load_dotenv()
-    url = "https://seller-analytics-api.wildberries.ru/api/v2/stocks-report/products/products"
     main()
