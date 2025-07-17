@@ -23,7 +23,7 @@ class WbAnalyticsClient:
         start_date: str,
         end_date: str,
         offset: int = 0,
-        limit: int = 150
+        limit: int = 1000
     ) -> dict:
         payload = {
             "stockType": "",
@@ -58,7 +58,7 @@ class WbAnalyticsClient:
         self,
         start_date: str,
         end_date: str,
-        limit: int = 150
+        limit: int = 1000
     ) -> list:
         offset = 0
         all_data = []
@@ -69,7 +69,7 @@ class WbAnalyticsClient:
                     start_date, end_date, offset=offset, limit=limit)
             except requests.HTTPError as e:
                 if e.response.status_code == 429:
-                    print("⏳ Превышен лимит запросов (429). Ждём 60 секунд")
+                    print("⏳ Превышен лимит запросов (429). Ждём 60 секунд...")
                     time.sleep(60)
                     continue
                 else:
@@ -83,7 +83,6 @@ class WbAnalyticsClient:
             all_data.extend(data)
             offset += limit
 
-            # Не более 3 запросов в минуту
             time.sleep(20)
 
         return all_data
@@ -109,7 +108,7 @@ def main():
     token = os.getenv("TOKEN")
 
     if not token:
-        print("❌ Токен не найден")
+        print("❌ Токен не найден.")
         return
 
     client = WbAnalyticsClient(token)
@@ -126,3 +125,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
