@@ -76,11 +76,11 @@ class WbAnalyticsClient:
                     raise
 
             data = result.get("data", [])
-            if not data:
+            if not data['items']:
                 print("✅ Все страницы загружены.")
                 break
 
-            all_data.extend(data)
+            all_data.extend(data['items'])
             offset += limit
 
             time.sleep(20)
@@ -125,4 +125,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
